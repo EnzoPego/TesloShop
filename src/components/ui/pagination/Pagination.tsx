@@ -23,7 +23,7 @@ export const Pagination = ({ totalPages }: Props) => {
   }
 
 
-  console.log({ pathname, searchParams, currentPage });
+ // console.log({ pathname, searchParams, currentPage });
 
   const allPages = generatePaginaionNumbers(currentPage,totalPages)
   console.log(allPages)
@@ -72,7 +72,6 @@ export const Pagination = ({ totalPages }: Props) => {
                       'bg-blue-600 shadow-sm text-white hover:text-white hover:bg-blue-700': page === currentPage
                     }
                   )
-                  
                 }
                 href={createPageUrl(page)}
               >

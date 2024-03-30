@@ -24,7 +24,7 @@ export const generatePaginaionNumbers = (currenPage:number, totalPages:number) =
     }
 
     // Si l página actual está en otro lugar medio
-    //mostrar laprimera página , puntos suspensivos , lapagina actual y vecinos
+    //mostrar la primera página , puntos suspensivos , la pagina actual y vecinos
 
     return[
         1,
