@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 
 
 interface Props{
-    slug: string
+  slug: string
 }
 
 export const StockLabel = ({slug}:Props) => {
