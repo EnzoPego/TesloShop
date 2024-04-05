@@ -7,8 +7,7 @@ import { notFound } from 'next/navigation';
 import { ProductMobileSlideshow, ProductSlideshow, QuantitySelector, SizeSelector, StockLabel } from '@/components';
 import { titleFont } from '@/config/fonts';
 import { getProductBySlug } from '@/actions';
-
-
+import { AddToCart } from './ui/AddToCart';
 
 
 export async function generateMetadata(
@@ -85,19 +84,8 @@ export default async function ProductBySlugPage({params}:Props) {
         <StockLabel slug={product.slug} />
 
         <p className='text-lg mb-5'>${product.price}</p>
-
-        {/* Selector de talles */}
-        <SizeSelector selectedSize={product.sizes[0]}
-        availableSizes={product.sizes}/>
-
-        {/* Selector de cantidad */}
-        <QuantitySelector  quantity={2}/>
-
-
-        {/* Boton */}
-        <button className='btn btn-primary my-5'>
-          Agregar al carrito
-        </button>
+        
+        <AddToCart product={product} />
 
         {/* Descripción */}
 
