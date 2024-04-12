@@ -5,14 +5,26 @@ import Link from "next/link"
 import { authenticate } from "@/actions"
 import { useFormState, useFormStatus } from "react-dom"
 import { IoInformationOutline } from "react-icons/io5"
+import { useEffect } from "react"
 import clsx from "clsx"
+//import { useRouter } from "next/navigation"
+
 
 
 export const LoginForm = () => {
 
   const [ state, dispatch ] = useFormState(authenticate, undefined)
-
   console.log({state})
+  
+  //const router = useRouter()
+
+  useEffect (()=>{
+    if (state === 'Success'){
+      //redireccionar
+      //router.replace('/')
+      window.location.replace('/')      
+    }
+  },[state])
 
 
   return (
@@ -36,7 +48,7 @@ export const LoginForm = () => {
         aria-live="polite"
         aria-atomic="true"
       >
-        {state ==="Invalid credentials." && (
+        {state ==="CredentialsSignin" && (
           <>
             <IoInformationOutline className="h-5 w-5 text-red-500" />
             <p className="text-sm text-red-500">Credenciales no son correctas</p>
