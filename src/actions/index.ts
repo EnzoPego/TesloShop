@@ -9,6 +9,9 @@
 // export * from './auth/register'
 
 export { setUserAddress } from './address/set-user-address'
+export { deleteUserAddress } from './address/delete-user-address';
+export { getUserAddress } from './address/get-user-address';
+
 
 export { getPaginatedProductsWithImages } from './product/product-pagination';
 export { getProductBySlug } from './product/get-product-by-slug';

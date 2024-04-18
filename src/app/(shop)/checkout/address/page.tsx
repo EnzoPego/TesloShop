@@ -3,7 +3,8 @@
 
 import { Title } from '@/components';
 import { AddressForm } from './ui/AddressForm';
-import { getCountries } from '@/actions';
+import { getCountries, getUserAddress } from '@/actions';
+import { auth } from '@/auth.config';
 
 
 
@@ -12,6 +13,16 @@ export default async function AddressPage() {
 
   const countries = await getCountries()
   //console.log(countries)
+
+  const session = await auth()
+
+  if( !session?.user ){
+    return(
+      <h3 className='text-5xl'> 500 - No hay sesión de ususario</h3>
+    )
+  }
+
+  const userAddress = await getUserAddress(session.user.id) ?? undefined
 
 
   return (
@@ -23,7 +34,7 @@ export default async function AddressPage() {
 
       </div>
 
-      <AddressForm countries={countries} />
+      <AddressForm countries={countries} userStoredAddress={userAddress} />
 
     </div>
   );
