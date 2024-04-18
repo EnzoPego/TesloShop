@@ -1,14 +1,17 @@
+
 "use client";
 
-import clsx from "clsx";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import clsx from 'clsx';
 
-import type { Address, Country } from "@/interfaces";
-import { useAddressStrore } from "@/store";
-import { useEffect } from "react";
-import { deleteUserAddress, setUserAddress } from "@/actions";
+
+import type { Address, Country } from '@/interfaces';
+import { deleteUserAddress, setUserAddress } from '@/actions';
+import { useAddressStrore } from '@/store';
+
 
 type FormInputs = {
   firstName: string;
@@ -20,129 +23,102 @@ type FormInputs = {
   country: string;
   phone: string;
   rememberAddress: boolean;
-};
-
-interface Props {
-  countries: Country[]
-  userStoredAddress?: Partial<Address>
 }
 
-export const AddressForm = ({countries, userStoredAddress = {}}:Props) => {
 
-  const router = useRouter()
+interface Props {
+  countries: Country[];
+  userStoredAddress?: Partial<Address>;
+}
 
-  const {handleSubmit, register,formState: { isValid }, reset } = useForm<FormInputs>({
-    
+
+export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
+
+  const router = useRouter();
+  const { handleSubmit, register, formState: { isValid }, reset } = useForm<FormInputs>({
     defaultValues: {
-      // Leer de la base de datos
       ...(userStoredAddress as any),
       rememberAddress: false,
-    },
+    }
   });
 
   const { data: session } = useSession({
-    required:true
+    required: true,
   })
 
-  useEffect(()=>{
+  const setAddress = useAddressStrore( state => state.setAddress );
+  const address = useAddressStrore( state => state.address );
 
-    if (address.firstName){
+
+
+  useEffect(() => {
+    if ( address.firstName ) {
       reset(address)
     }
   },[])
+  
 
 
-  const setAddress = useAddressStrore(state => state.setAddress)
-  const address = useAddressStrore(state => state.address)
 
- 
-  const onSubmit = async (data: FormInputs) => {
-    console.log({ data });
 
-    setAddress(data);
-    const {rememberAddress, ...restAddress} = data
+  const onSubmit = async( data: FormInputs ) => {
+    
 
-    if (rememberAddress) {
-      // server action
-      await setUserAddress(restAddress,session!.user.id)
-    }else{
-      // server action
-      await deleteUserAddress(session!.user.id)
+    const { rememberAddress, ...restAddress } = data;
+
+    setAddress(restAddress);
+
+    if ( rememberAddress ) {
+      await setUserAddress(restAddress, session!.user.id );
+    } else {
+      await deleteUserAddress(session!.user.id);
     }
 
-    router.push('/checkout')
+    router.push('/checkout');
 
-  };
+  }
+
+
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="grid grid-cols-1 gap-2 sm:gap-5 sm:grid-cols-2"
-    >
+    <form onSubmit={ handleSubmit( onSubmit ) }  className="grid grid-cols-1 gap-2 sm:gap-5 sm:grid-cols-2">
       <div className="flex flex-col mb-2">
         <span>Nombres</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("firstName", { required: true })}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('firstName', { required: true  }) } />
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Apellidos</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("lastName", { required: true })}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('lastName', { required: true  }) } />
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Dirección</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("address", { required: true })}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('address', { required: true  }) } />
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Dirección 2 (opcional)</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("address2")}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('address2') } />
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Código postal</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("postalCode", { required: true })}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('postalCode', { required: true  }) } />
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Ciudad</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("city", { required: true })}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('city', { required: true  }) } />
       </div>
 
       <div className="flex flex-col mb-2">
         <span>País</span>
-        <select
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("country", { required: true })}
-        >
+        <select className="p-2 border rounded-md bg-gray-300" { ...register('country', { required: true  }) }>
           <option value="">[ Seleccione ]</option>
           {
-            countries.map(country=>(
-              <option key={country.id} value={country.id}>{country.name}</option>
+            countries.map( country => (
+              <option key={ country.id } value={ country.id }>{ country.name }</option>
             ))
           }
         </select>
@@ -150,14 +126,11 @@ export const AddressForm = ({countries, userStoredAddress = {}}:Props) => {
 
       <div className="flex flex-col mb-2">
         <span>Teléfono</span>
-        <input
-          type="text"
-          className="p-2 border rounded-md bg-gray-300"
-          {...register("phone", { required: true })}
-        />
+        <input type="text" className="p-2 border rounded-md bg-gray-300" { ...register('phone', { required: true  }) } />
       </div>
 
       <div className="flex flex-col mb-2 sm:mt-1">
+        
         <div className="inline-flex items-center mb-10 ">
           <label
             className="relative flex cursor-pointer items-center rounded-full p-3"
@@ -167,7 +140,7 @@ export const AddressForm = ({countries, userStoredAddress = {}}:Props) => {
               type="checkbox"
               className="border-gray-500 before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-300 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-blue-500 checked:bg-blue-500 checked:before:bg-blue-500 hover:before:opacity-10"
               id="checkbox"
-              {...register("rememberAddress")}
+              { ...register('rememberAddress') }
             />
             <div className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
               <svg
@@ -191,13 +164,13 @@ export const AddressForm = ({countries, userStoredAddress = {}}:Props) => {
         </div>
 
         <button
-          disabled={!isValid}
+          disabled={ !isValid }
           // href="/checkout"
           type="submit"
           // className="btn-primary flex w-full sm:w-1/2 justify-center "
-          className={clsx({
-            "btn-primary": isValid,
-            "btn-disabled": !isValid,
+          className={ clsx({
+            'btn-primary': isValid,
+            'btn-disabled': !isValid,
           })}
         >
           Siguiente

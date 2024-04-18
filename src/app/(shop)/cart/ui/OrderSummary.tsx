@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 
 export const OrderSummary = () => {
 
-  const [loader,setLoader] = useState(false)
-  const {itemsInCart,subTotal,tax,total} = useCartStore(state => state.getSummaryInformation())
+  const [ loader, setLoader ] = useState(false)
+  const { itemsInCart, subTotal, tax, total } = useCartStore(state => state.getSummaryInformation())
 
   useEffect(()=>{
     setLoader(true)
