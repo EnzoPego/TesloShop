@@ -7,11 +7,9 @@ import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import clsx from 'clsx';
 
-
-import type { Address, Country } from '@/interfaces';
+import type { UserAddress, Country } from '@/interfaces';
 import { deleteUserAddress, setUserAddress } from '@/actions';
 import { useAddressStrore } from '@/store';
-
 
 type FormInputs = {
   firstName: string;
@@ -28,16 +26,24 @@ type FormInputs = {
 
 interface Props {
   countries: Country[];
-  userStoredAddress?: Partial<Address>;
+  userStoredAddress?: Partial<UserAddress>;
 }
 
 
 export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
 
+  const {
+    id, // No se usará
+    userId, // No se usará
+    countryId: country,
+    ...restuserStoredAddress
+  } =userStoredAddress
+
   const router = useRouter();
   const { handleSubmit, register, formState: { isValid }, reset } = useForm<FormInputs>({
     defaultValues: {
-      ...(userStoredAddress as any),
+      ...restuserStoredAddress,
+      country,
       rememberAddress: false,
     }
   });
@@ -49,27 +55,20 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
   const setAddress = useAddressStrore( state => state.setAddress );
   const address = useAddressStrore( state => state.address );
 
-
-
   useEffect(() => {
     if ( address.firstName ) {
       reset(address)
     }
-  },[])
+  },[reset, address])
   
-
-
-
-
   const onSubmit = async( data: FormInputs ) => {
     
+    const {  rememberAddress, ...address } = data;
 
-    const { rememberAddress, ...restAddress } = data;
-
-    setAddress(restAddress);
+    setAddress(address);
 
     if ( rememberAddress ) {
-      await setUserAddress(restAddress, session!.user.id );
+      await setUserAddress(address, session!.user.id );
     } else {
       await deleteUserAddress(session!.user.id);
     }
@@ -77,7 +76,6 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
     router.push('/checkout');
 
   }
-
 
 
   return (
@@ -164,13 +162,12 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
         </div>
 
         <button
-          disabled={ !isValid }
-          // href="/checkout"
+          disabled={!isValid}
           type="submit"
-          // className="btn-primary flex w-full sm:w-1/2 justify-center "
-          className={ clsx({
-            'btn-primary': isValid,
-            'btn-disabled': !isValid,
+          // className="btn-primary flex w-full sm:w-1/2 justify-center"
+          className={clsx({
+            'btn-primary flex w-full sm:w-1/2 justify-center': isValid,
+            'btn-disabled flex w-full sm:w-1/2 justify-center': !isValid,
           })}
         >
           Siguiente

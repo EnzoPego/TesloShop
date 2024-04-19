@@ -1,10 +1,12 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
+import clsx from "clsx";
+
+import { placeOrder } from "@/actions";
 import { useAddressStrore, useCartStore } from "@/store";
 import { currencyFormat } from "@/utils";
-import clsx from "clsx";
-import { useEffect, useState } from "react";
 
 
 export const PlaceOrder = () => {
@@ -21,22 +23,23 @@ export const PlaceOrder = () => {
         setLoaded(true)
     },[])
 
-    const onPlaceOrder = async() => {
-        setIsPlacingOrder(true)
+    const onPlaceOrder = async () => {
+      setIsPlacingOrder(true);
 
-        const productsToOrder = cart.map(product =>({
-            productId: product.id,
-            quantity: product.quantity,
-            size: product.size,
-        }))
+      const productsToOrder = cart.map((product) => ({
+        productId: product.id,
+        quantity: product.quantity,
+        size: product.size,
+      }));
 
-        console.log({address, productsToOrder})
+      console.log({ address, productsToOrder });
 
-        // Server Action
-        
-        
-        setIsPlacingOrder(false)
-    }
+      // Server Action
+      const resp = await placeOrder(productsToOrder, address);
+      console.log({resp})
+
+      setIsPlacingOrder(false);
+    };
     
 
 
