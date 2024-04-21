@@ -6,22 +6,21 @@ interface State {
   cart: CartProduct[];
 
   getTotalItems: () => number;
-  getSummaryInformation:() => {
+  getSummaryInformation: () => {
     subTotal: number;
     tax: number;
     total: number;
     itemsInCart: number;
- }
+  };
 
   addProductToCart: (product: CartProduct) => void;
   updateProductQuantity: (product: CartProduct, quantity: number) => void;
   removeProduct: (product: CartProduct) => void;
+  clearCart: () => void;
 }
 
 export const useCartStore = create<State>()(
-
   persist(
-
     (set, get) => ({
       cart: [],
 
@@ -32,25 +31,27 @@ export const useCartStore = create<State>()(
         return cart.reduce((total, item) => total + item.quantity, 0);
       },
 
-      getSummaryInformation: ()=>{
-        const { cart } = get()
+      getSummaryInformation: () => {
+        const { cart } = get();
 
         const subTotal = cart.reduce(
-            (subTotal,product)=>(product.quantity * product.price) + subTotal,
-            0
-        )
-        const tax = subTotal * 0.15
-        const total = subTotal + tax
-        const itemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
+          (subTotal, product) => product.quantity * product.price + subTotal,
+          0
+        );
+        const tax = subTotal * 0.15;
+        const total = subTotal + tax;
+        const itemsInCart = cart.reduce(
+          (total, item) => total + item.quantity,
+          0
+        );
 
-        return{
-            subTotal,
-            tax,
-            total,
-            itemsInCart
-        }
+        return {
+          subTotal,
+          tax,
+          total,
+          itemsInCart,
+        };
       },
-
 
       addProductToCart: (product: CartProduct) => {
         const { cart } = get();
@@ -64,7 +65,6 @@ export const useCartStore = create<State>()(
           set({ cart: [...cart, product] });
           return;
         }
-
 
         // 2. Se que el producto existe por talla... tengo que incrementar
         const updatedCardProducts = cart.map((item) => {
@@ -100,6 +100,11 @@ export const useCartStore = create<State>()(
 
         set({ cart: updatedCardProducts });
       },
+
+      clearCart: () => {
+        set({ cart: [] });
+      },
+
     }),
 
     {
