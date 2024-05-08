@@ -21,3 +21,4 @@ export  * from './products/product-grid/ProductGridItem'
 export * from './providers/Providers'
 
 export * from './paypal/PayPalButton'
+export * from './orders/OrderStatus'

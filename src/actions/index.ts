@@ -16,3 +16,7 @@ export { logout } from './auth/logout'
 export { registerUser } from './auth/register'
 
 export { getCountries } from './country/get-countries'
+
+export {setTransactionId} from './payments/setTransactionId'
+export {paypalCheckPayment} from './payments/paypal-check-payment'
+
