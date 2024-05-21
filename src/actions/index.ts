@@ -1,4 +1,5 @@
 
+export { getPaginatedOrders } from './order/get-paginated-orders';
 export { placeOrder } from './order/place-order'
 
 export { setUserAddress } from './address/set-user-address'
@@ -19,4 +20,6 @@ export { getCountries } from './country/get-countries'
 
 export {setTransactionId} from './payments/setTransactionId'
 export {paypalCheckPayment} from './payments/paypal-check-payment'
+
+
 
