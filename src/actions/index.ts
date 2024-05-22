@@ -21,5 +21,5 @@ export { getCountries } from './country/get-countries'
 export {setTransactionId} from './payments/setTransactionId'
 export {paypalCheckPayment} from './payments/paypal-check-payment'
 
-
-
+export { getPaginatedUsers } from './user/get-paginated-users';
+export { chageUserRole } from './user/change-user-rol';

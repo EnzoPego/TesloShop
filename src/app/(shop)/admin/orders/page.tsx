@@ -1,6 +1,6 @@
 export const revalidate = 0;
 
-import { Title } from "@/components";
+import { Pagination, Title } from "@/components";
 
 import Link from "next/link";
 import { IoCardOutline } from "react-icons/io5";
@@ -86,6 +86,8 @@ export default async function OrdersPage() {
             ))}
           </tbody>
         </table>
+
+        <Pagination totalPages={1} />
       </div>
     </>
   );
