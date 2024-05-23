@@ -1,49 +1,120 @@
 "use client";
 
-import { Product } from "@/interfaces";
+import { createUpdateProduct } from "@/actions";
+import { Category, Product, ProductImage } from "@/interfaces";
+import clsx from "clsx";
+import Image from "next/image";
+
+import { useForm } from "react-hook-form";
 
 interface Props {
-  product: Product;
+  product: Product  & { ProductImage?: ProductImage[]};
+  categories: Category[]
 }
 
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
-export const ProductForm = ({ product }: Props) => {
+interface FormInputs {
+  title: string;
+  slug: string;
+  description: string;
+  price: number;
+  inStock: number;
+  sizes: string[];
+  tags: string;
+  gender: "men" | "women" | "kid" | "unisex";
+  categoryId: string;
+}
+
+
+export const ProductForm = ({ product,categories }: Props) => {
+
+  const {
+    handleSubmit,
+    register,
+    formState:{isValid},
+    getValues,
+    setValue,
+    watch,
+  } = useForm<FormInputs>({
+    defaultValues:{
+      ...product,
+      tags: product.tags.join(', '),
+      sizes: product.sizes ?? []
+    }
+  })
+
+  watch('sizes')
+
+  const onSizeChanged = ( size:string )=>{
+    
+    const sizes = new Set (getValues('sizes'))
+
+    sizes.has(size) ? sizes.delete(size) : sizes.add(size)
+    setValue('sizes', Array.from(sizes))
+  }
+
+
+
+  const onSubmit = async( data:FormInputs )=>{
+
+    const { ...productToSave } = data
+    
+    const formData = new FormData()
+
+    formData.append('id',product.id ?? '')
+    formData.append('title',productToSave.title)
+    formData.append('slug',productToSave.slug)
+    formData.append('description',productToSave.description)
+    formData.append('price',productToSave.price.toString() )
+    formData.append('inStock',productToSave.inStock.toString() )
+    formData.append('sizes',productToSave.sizes.toString() )
+    formData.append('tags',productToSave.tags)
+    formData.append('categoryId',productToSave.categoryId)
+    formData.append('gender',productToSave.gender)
+
+    const { ok } = await createUpdateProduct(formData)
+
+    console.log({ok})
+
+  }
+
+
   return (
-    <form className="grid px-5 mb-16 grid-cols-1 sm:px-0 sm:grid-cols-2 gap-3">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid px-5 mb-16 grid-cols-1 sm:px-0 sm:grid-cols-2 gap-3">
       {/* Textos */}
       <div className="w-full">
         <div className="flex flex-col mb-2">
           <span>Título</span>
-          <input type="text" className="p-2 border rounded-md bg-gray-200" />
+          <input type="text" className="p-2 border rounded-md bg-gray-300" {...register('title',{required:true})}/>
         </div>
 
         <div className="flex flex-col mb-2">
           <span>Slug</span>
-          <input type="text" className="p-2 border rounded-md bg-gray-200" />
+          <input type="text" className="p-2 border rounded-md bg-gray-300" {...register('slug',{required:true})} />
         </div>
 
         <div className="flex flex-col mb-2">
           <span>Descripción</span>
           <textarea
             rows={5}
-            className="p-2 border rounded-md bg-gray-200"
-          ></textarea>
+            className="p-2 border rounded-md bg-gray-300" {...register('description',{required:true})}>
+          </textarea>
         </div>
 
         <div className="flex flex-col mb-2">
           <span>Price</span>
-          <input type="number" className="p-2 border rounded-md bg-gray-200" />
+          <input type="number" className="p-2 border rounded-md bg-gray-300" {...register('price',{required:true, min:0})} />
         </div>
 
         <div className="flex flex-col mb-2">
           <span>Tags</span>
-          <input type="text" className="p-2 border rounded-md bg-gray-200" />
+          <input type="text" className="p-2 border rounded-md bg-gray-300" {...register('tags',{required:true})}/>
         </div>
 
         <div className="flex flex-col mb-2">
           <span>Gender</span>
-          <select className="p-2 border rounded-md bg-gray-200">
+          <select className="p-2 border rounded-md bg-gray-300" {...register('gender',{required:true})}>
             <option value="">[Seleccione]</option>
             <option value="men">Men</option>
             <option value="women">Women</option>
@@ -54,8 +125,13 @@ export const ProductForm = ({ product }: Props) => {
 
         <div className="flex flex-col mb-2">
           <span>Categoria</span>
-          <select className="p-2 border rounded-md bg-gray-200">
+          <select className="p-2 border rounded-md bg-gray-300"{...register('categoryId',{required:true})}>
             <option value="">[Seleccione]</option>
+            {
+              categories.map(category=>(
+               <option key={category.id} value={category.id}>{category.name}</option>
+              ))
+            }
           </select>
         </div>
 
@@ -75,7 +151,17 @@ export const ProductForm = ({ product }: Props) => {
             {
               sizes.map( size => (
                 // bg-blue-500 text-white <--- si está seleccionado
-                <div key={ size } className="flex  items-center justify-center w-10 h-10 mr-2 border rounded-md">
+                <div
+                 key={ size } 
+                 onClick={()=> onSizeChanged(size)}
+                 className={
+                  clsx(
+                    "rounded-md cursor-pointer p-2 mr-2 mb-2 w-14 transition-all text-center",
+                    {
+                      'bg-blue-500 text-white': getValues('sizes').includes(size)
+                    }
+                  )
+                 }>
                   <span>{ size }</span>
                 </div>
               ))
@@ -90,11 +176,44 @@ export const ProductForm = ({ product }: Props) => {
             <input 
               type="file"
               multiple 
-              className="p-2 border rounded-md bg-gray-200" 
+              className="p-2 border rounded-md bg-gray-300" 
               accept="image/png, image/jpeg"
             />
 
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+            {
+              product.ProductImage?.map(image=>(
+
+                <div key={image.id}>
+                  
+                  <Image
+                  className="rounded-t shadow-md"
+                  alt={product.title ?? ''}
+                  src={`/products/${image.url}`}
+                  width={300}
+                  height={300}
+                  />
+
+                  <button
+                    type="button" 
+                    onClick={()=>console.log(image.id,image.url)}                
+                    className="btn-danger rounded-b-xl md:w-full ">
+                    Eliminar
+                  </button>
+
+                </div>
+
+              ))
+            }
+
+
+          </div>
+
+
+
 
         </div>
       </div>

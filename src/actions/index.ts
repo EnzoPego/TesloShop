@@ -1,4 +1,8 @@
 
+export { createUpdateProduct } from './product/create-update-product';
+
+export { getCategories } from './category/get-categories';
+
 export { getPaginatedOrders } from './order/get-paginated-orders';
 export { placeOrder } from './order/place-order'
 
