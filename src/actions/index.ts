@@ -1,3 +1,4 @@
+export { deleteProductImage } from './product/delete-product-image';
 
 export { createUpdateProduct } from './product/create-update-product';
 

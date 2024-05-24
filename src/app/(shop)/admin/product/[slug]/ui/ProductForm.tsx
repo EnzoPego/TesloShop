@@ -1,14 +1,15 @@
 "use client";
 
-import { createUpdateProduct } from "@/actions";
-import { Category, Product, ProductImage } from "@/interfaces";
+import { createUpdateProduct, deleteProductImage } from "@/actions";
+import { ProductImage } from "@/components";
+import { Category, Product, ProductImage as ProductWithImage} from "@/interfaces";
 import clsx from "clsx";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 interface Props {
-  product: Product  & { ProductImage?: ProductImage[]};
+  product: Partial <Product>  & { ProductImage?: ProductWithImage[]};
   categories: Category[]
 }
 
@@ -24,10 +25,14 @@ interface FormInputs {
   tags: string;
   gender: "men" | "women" | "kid" | "unisex";
   categoryId: string;
+
+  images?: FileList;
 }
 
 
 export const ProductForm = ({ product,categories }: Props) => {
+
+  const router = useRouter() 
 
   const {
     handleSubmit,
@@ -39,8 +44,10 @@ export const ProductForm = ({ product,categories }: Props) => {
   } = useForm<FormInputs>({
     defaultValues:{
       ...product,
-      tags: product.tags.join(', '),
-      sizes: product.sizes ?? []
+      tags: product.tags?.join(', '),
+      sizes: product.sizes ?? [],
+
+      images: undefined
     }
   })
 
@@ -58,11 +65,13 @@ export const ProductForm = ({ product,categories }: Props) => {
 
   const onSubmit = async( data:FormInputs )=>{
 
-    const { ...productToSave } = data
+    const {images, ...productToSave } = data
     
     const formData = new FormData()
 
-    formData.append('id',product.id ?? '')
+    if (product.id){
+      formData.append('id',product.id ?? '')
+    }
     formData.append('title',productToSave.title)
     formData.append('slug',productToSave.slug)
     formData.append('description',productToSave.description)
@@ -73,13 +82,27 @@ export const ProductForm = ({ product,categories }: Props) => {
     formData.append('categoryId',productToSave.categoryId)
     formData.append('gender',productToSave.gender)
 
-    const { ok } = await createUpdateProduct(formData)
+    if ( images ) {
+      for ( let i = 0; i < images.length; i++  ) {
+        formData.append('images', images[i]);
+      }
+    }
+
+    const { ok,  product:updatedProduct } = await createUpdateProduct(formData)
 
     console.log({ok})
 
-  }
+    if ( !ok ) {
+      alert('Producto no se pudo actualizar');
+      return;
+    }
+
+    router.replace(`/admin/product/${ updatedProduct?.slug }`)
 
 
+  };
+
+  
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid px-5 mb-16 grid-cols-1 sm:px-0 sm:grid-cols-2 gap-3">
       {/* Textos */}
@@ -142,6 +165,13 @@ export const ProductForm = ({ product,categories }: Props) => {
 
       {/* Selector de tallas y fotos */}
       <div className="w-full">
+
+      <div className="flex flex-col mb-2">
+          <span>Inventario</span>
+          <input type="number" className="p-2 border rounded-md bg-gray-300" {...register('inStock',{required:true, min:0})} />
+        </div>
+
+
         {/* As checkboxes */}
         <div className="flex flex-col">
 
@@ -161,7 +191,7 @@ export const ProductForm = ({ product,categories }: Props) => {
                       'bg-blue-500 text-white': getValues('sizes').includes(size)
                     }
                   )
-                 }>
+                }>
                   <span>{ size }</span>
                 </div>
               ))
@@ -175,9 +205,10 @@ export const ProductForm = ({ product,categories }: Props) => {
             <span>Fotos</span>
             <input 
               type="file"
+              {...register('images')}
               multiple 
               className="p-2 border rounded-md bg-gray-300" 
-              accept="image/png, image/jpeg"
+              accept="image/png, image/jpeg, image/jpg, image/avif"
             />
 
           </div>
@@ -189,17 +220,17 @@ export const ProductForm = ({ product,categories }: Props) => {
 
                 <div key={image.id}>
                   
-                  <Image
+                  <ProductImage
                   className="rounded-t shadow-md"
                   alt={product.title ?? ''}
-                  src={`/products/${image.url}`}
+                  src={image.url}
                   width={300}
                   height={300}
                   />
 
                   <button
                     type="button" 
-                    onClick={()=>console.log(image.id,image.url)}                
+                    onClick={()=>deleteProductImage(image.id,image.url)}                
                     className="btn-danger rounded-b-xl md:w-full ">
                     Eliminar
                   </button>
@@ -209,14 +240,10 @@ export const ProductForm = ({ product,categories }: Props) => {
               ))
             }
 
-
           </div>
-
-
-
 
         </div>
       </div>
     </form>
   );
-};
+}
