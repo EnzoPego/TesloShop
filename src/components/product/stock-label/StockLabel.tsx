@@ -16,15 +16,15 @@ export const StockLabel = ({slug}:Props) => {
   const [isLoading , setIsLoadin] = useState(true)
 
   useEffect(() => {
+    const getStock = async () => {
+     const inStock = await getStockBySlug(slug);
+     //console.log({inStock})
+     setStock(inStock);
+     setIsLoadin(false);
+    };
     getStock();
-  }, []);
+  }, [slug]);
 
-  const getStock = async () => {
-   const inStock = await getStockBySlug(slug);
-   //console.log({inStock})
-   setStock(inStock);
-   setIsLoadin(false);
-  };
 
 
   return (
